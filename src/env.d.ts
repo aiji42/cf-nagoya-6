@@ -1,3 +1,4 @@
 interface CloudflareEnv {
-  MY_BUCKET: R2Bucket
+  MY_BUCKET: R2Bucket;
+  AI: Ai;
 }

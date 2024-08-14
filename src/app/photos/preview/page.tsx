@@ -1,5 +1,6 @@
 import { getRequestContext } from "@cloudflare/next-on-pages";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 export const runtime = "edge";
 
@@ -29,8 +30,25 @@ const PreviewPage = async ({
           {Math.round(buffer.byteLength / 1024)} KB
         </span>
       </div>
+      <Suspense fallback={<p>Generating description...</p>}>
+        <Description buffer={buffer} />
+      </Suspense>
     </div>
   );
 };
 
 export default PreviewPage;
+
+const Description = async ({ buffer }: { buffer: ArrayBuffer }) => {
+  const input = {
+    image: [...new Uint8Array(buffer)],
+    prompt: "Generate a caption for this image",
+    max_tokens: 512,
+  };
+  const response = await getRequestContext().env.AI.run(
+    "@cf/llava-hf/llava-1.5-7b-hf",
+    input,
+  );
+
+  return <p className="text-sm">{response.description}</p>;
+};
